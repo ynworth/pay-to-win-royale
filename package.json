@@ -1,0 +1,27 @@
+{
+  "name": "pay-to-win-royale",
+  "description": "A multiplayer Clash Royale-style game built with Phaser, Socket.IO and TypeScript.",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false server/index.ts",
+    "build": "vite build --config vite/config.prod.mjs",
+    "start": "npm run build && NODE_ENV=production PORT=8080 tsx server/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "tsx": "^4.23.15",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "phaser": "^4.0.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
+    "terser": "^5.39.0"
+  }
+}
