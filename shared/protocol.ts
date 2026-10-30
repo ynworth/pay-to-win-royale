@@ -1,10 +1,10 @@
-import type { Side } from "./arena";
+import type { Seat, TeamId } from "./teams";
 import type { UnitType } from "./units";
 
 export interface UnitSnapshot {
   id: number;
   type: UnitType;
-  side: Side;
+  team: TeamId;
   x: number;
   y: number;
   hp: number;
@@ -17,7 +17,7 @@ export interface SpawnRequest {
 }
 
 export interface ServerToClientEvents {
-  welcome: (info: { side: Side | null }) => void;
+  welcome: (info: { seat: Seat | null }) => void;
   state: (units: UnitSnapshot[]) => void;
 }
 

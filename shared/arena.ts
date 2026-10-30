@@ -1,3 +1,5 @@
+import type { TeamId } from "./teams";
+
 export interface Point {
   x: number;
   y: number;
@@ -8,12 +10,6 @@ export interface Rect {
   right: number;
   top: number;
   bottom: number;
-}
-
-export type Side = "top" | "bottom";
-
-export function opponentOf(side: Side): Side {
-  return side === "top" ? "bottom" : "top";
 }
 
 export const ARENA = { width: 540, height: 960 };
@@ -28,10 +24,21 @@ export const BRIDGES: Rect[] = [
   { left: 420, right: 480, top: RIVER.top, bottom: RIVER.bottom },
 ];
 
-export const TOWERS: Record<Side, Point> = {
-  top: { x: ARENA.width / 2, y: 100 },
-  bottom: { x: ARENA.width / 2, y: ARENA.height - 100 },
-};
+export interface Base {
+  tower: Point;
+  deployZone: Rect;
+}
+
+export const BASES: Base[] = [
+  {
+    tower: { x: ARENA.width / 2, y: ARENA.height - 100 },
+    deployZone: { left: 0, right: ARENA.width, top: RIVER.bottom, bottom: ARENA.height },
+  },
+  {
+    tower: { x: ARENA.width / 2, y: 100 },
+    deployZone: { left: 0, right: ARENA.width, top: 0, bottom: RIVER.top },
+  },
+];
 
 export const RIVER_SEGMENTS: Rect[] = (() => {
   const segments: Rect[] = [];
@@ -44,6 +51,8 @@ export const RIVER_SEGMENTS: Rect[] = (() => {
   return segments;
 })();
 
-export function canDeployAt(side: Side, y: number, radius: number): boolean {
-  return side === "top" ? y < RIVER.top - radius : y > RIVER.bottom + radius;
+export function canDeployAt(team: TeamId, x: number, y: number, radius: number): boolean {
+  const zone = BASES[team]?.deployZone;
+  if (!zone) return false;
+  return x - radius >= zone.left && x + radius <= zone.right && y - radius >= zone.top && y + radius <= zone.bottom;
 }

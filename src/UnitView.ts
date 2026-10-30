@@ -1,9 +1,7 @@
 import { GameObjects, type Scene } from "phaser";
-import type { Side } from "../shared/arena";
 import type { UnitSnapshot } from "../shared/protocol";
 import { getStats } from "../shared/units";
-
-export const SIDE_COLORS: Record<Side, number> = { bottom: 0x2266ff, top: 0xff3333 };
+import type { Perspective } from "./Perspective";
 
 const HP_BAR_HEIGHT = 4;
 
@@ -16,25 +14,27 @@ export class UnitView {
   private targetY: number;
   private readonly maxHp: number;
 
-  constructor(scene: Scene, unit: UnitSnapshot) {
+  constructor(
+    scene: Scene,
+    unit: UnitSnapshot,
+    private readonly perspective: Perspective,
+  ) {
     const stats = getStats(unit.type);
     const size = stats.radius * 2;
     this.maxHp = stats.maxHp;
-    this.targetX = unit.x;
-    this.targetY = unit.y;
+    ({ x: this.targetX, y: this.targetY } = perspective.toScreen(unit));
 
-    const body = scene.add.rectangle(0, 0, size, size, stats.color).setStrokeStyle(3, SIDE_COLORS[unit.side]);
+    const body = scene.add.image(0, 0, unit.type).setDisplaySize(size, size);
     const barY = -stats.radius - 6;
     const hpBack = scene.add.rectangle(-stats.radius, barY, size, HP_BAR_HEIGHT, 0x000000).setOrigin(0, 0.5);
     this.hpFill = scene.add.rectangle(-stats.radius, barY, size, HP_BAR_HEIGHT, 0x44ff44).setOrigin(0, 0.5);
 
-    this.container = scene.add.container(unit.x, unit.y, [body, hpBack, this.hpFill]);
+    this.container = scene.add.container(this.targetX, this.targetY, [body, hpBack, this.hpFill]);
     this.apply(unit);
   }
 
   apply(unit: UnitSnapshot): void {
-    this.targetX = unit.x;
-    this.targetY = unit.y;
+    ({ x: this.targetX, y: this.targetY } = this.perspective.toScreen(unit));
     this.hpFill.scaleX = unit.hp / this.maxHp;
   }
 

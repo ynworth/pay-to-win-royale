@@ -1,28 +1,25 @@
-import { ARENA, canDeployAt, type Side } from "../shared/arena";
+import { ARENA, canDeployAt } from "../shared/arena";
 import type { UnitSnapshot } from "../shared/protocol";
+import type { TeamId } from "../shared/teams";
 import { getStats, type UnitType } from "../shared/units";
 import { clamp, keepInArena, pushOutOfRiver, separateUnits } from "./physics";
 import { Unit } from "./Unit";
 
-const MAX_UNITS = 200;
+const MAX_UNITS = 2000;
 
 export class Match {
   private units = new Map<number, Unit>();
   private nextId = 1;
 
-  spawn(type: UnitType, side: Side, x: number, y: number): boolean {
+  spawn(type: UnitType, team: TeamId, x: number, y: number): boolean {
     if (this.units.size >= MAX_UNITS) return false;
 
     const { radius } = getStats(type);
-    if (!canDeployAt(side, y, radius)) return false;
+    const spawnX = clamp(x, radius, ARENA.width - radius);
+    const spawnY = clamp(y, radius, ARENA.height - radius);
+    if (!canDeployAt(team, spawnX, spawnY, radius)) return false;
 
-    const unit = new Unit(
-      this.nextId++,
-      type,
-      side,
-      clamp(x, radius, ARENA.width - radius),
-      clamp(y, radius, ARENA.height - radius),
-    );
+    const unit = new Unit(this.nextId++, type, team, spawnX, spawnY);
     this.units.set(unit.id, unit);
     return true;
   }

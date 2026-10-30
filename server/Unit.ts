@@ -1,5 +1,7 @@
-import { TOWERS, opponentOf, type Point, type Side } from "../shared/arena";
+// add homeless emote
+import { BASES, type Point } from "../shared/arena";
 import type { UnitSnapshot } from "../shared/protocol";
+import type { TeamId } from "../shared/teams";
 import { getStats, type UnitStats, type UnitType } from "../shared/units";
 import { nextWaypoint } from "./pathing";
 
@@ -11,7 +13,7 @@ export class Unit {
   constructor(
     readonly id: number,
     readonly type: UnitType,
-    readonly side: Side,
+    readonly team: TeamId,
     public x: number,
     public y: number,
   ) {
@@ -30,7 +32,7 @@ export class Unit {
     if (target && this.edgeDistanceTo(target) <= this.stats.range) {
       this.attack(target);
     } else {
-      this.moveToward(target ?? TOWERS[opponentOf(this.side)], dt);
+      this.moveToward(target ?? this.nearestEnemyTower(), dt);
     }
   }
 
@@ -39,20 +41,34 @@ export class Unit {
   }
 
   toSnapshot(): UnitSnapshot {
-    return { id: this.id, type: this.type, side: this.side, x: Math.round(this.x), y: Math.round(this.y), hp: this.hp };
+    return { id: this.id, type: this.type, team: this.team, x: Math.round(this.x), y: Math.round(this.y), hp: this.hp };
   }
 
   private findTarget(units: readonly Unit[]): Unit | null {
     let best: Unit | null = null;
     let bestDistance = Infinity;
     for (const other of units) {
-      if (other.side === this.side || !other.isAlive) continue;
+      if (other.team === this.team || !other.isAlive) continue;
       const distance = this.edgeDistanceTo(other);
       if (distance < bestDistance) {
         best = other;
         bestDistance = distance;
       }
     }
+    return best;
+  }
+
+  private nearestEnemyTower(): Point {
+    let best: Point = this;
+    let bestDistance = Infinity;
+    BASES.forEach(({ tower }, team) => {
+      if (team === this.team) return;
+      const distance = Math.hypot(tower.x - this.x, tower.y - this.y);
+      if (distance < bestDistance) {
+        best = tower;
+        bestDistance = distance;
+      }
+    });
     return best;
   }
 

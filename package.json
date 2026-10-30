@@ -1,6 +1,6 @@
 {
   "name": "pay-to-win-royale",
-  "description": "A multiplayer Clash Royale-style game built with Phaser, Socket.IO and TypeScript.",
+  "description": "clash royale, but even more economically ridiculous than it already is.",
   "version": "0.1.0",
   "private": true,
   "type": "module",
